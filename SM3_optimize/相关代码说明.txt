@@ -1,0 +1,12 @@
+代码说明：
+该代码是SM3优化代码，是Project:do your best to optimize SM3 implementation(software)
+
+运行指导：
+main函数中的字符串变量str是输入值，为十六进制字符串;32比特的数组v[8] 是输出值，为十六进制整型。改变变量str的值即能控制输入。
+
+个人贡献：
+自己一人完成。
+
+代码引用说明：
+1、https://blog.csdn.net/qq_35699583/article/details/113060927，实现迭代压缩过程。
+2、https://blog.csdn.net/nicai_hualuo/article/details/121555000，实现十进制到十六进制的转换。
