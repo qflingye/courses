@@ -1,0 +1,13 @@
+代码说明：
+    该代码是SM3长度扩展攻击代码，是Project:implement length extension attack for SM3。
+    长度扩展攻击即攻击者不知道a，知道H(a）（a是填充后的值），通过长度扩展攻击，攻击者可以知道H(a+b)。所以，攻击者可以将已知的H(a)作为新的IV输入，放入SM3算法中，即可得到H(a+b)。
+
+运行指导：
+    attack函数中的字符串变量data是攻击者自行选择的数值b，为十六进制字符串；main函数中32比特的数组v[8]是散列值H(a)，32比特的数组v1[8]是散列值H(a+b)，为十六进制整型。
+
+个人贡献：
+    自己一人完成。
+
+代码引用说明：
+1、https://blog.csdn.net/qq_35699583/article/details/113060927，实现迭代压缩过程。
+2、https://blog.csdn.net/nicai_hualuo/article/details/121555000，实现十进制到十六进制的转换
