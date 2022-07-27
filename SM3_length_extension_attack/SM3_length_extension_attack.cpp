@@ -176,7 +176,7 @@ void attack(u32 H[],u32 HH[]) {//输入，输出
 	all(data, HH, H);
 }
 int main() {
-	string str = "61646d696e";//输入消息,16进制
+	string str = "616263";//输入消息,16进制
 	u32 v[8] = { 0 }; u32 v1[8] = { 0 };
 	all(str,v,IV);
 	//printf("杂凑值：");
