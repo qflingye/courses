@@ -1,11 +1,13 @@
 代码说明：
-该代码是SM3优化代码，是Project:do your best to optimize SM3 implementation(software)
+    该代码是SM3优化代码，是Project:do your best to optimize SM3 implementation(software)
+    该代码借助SIMD指令集和循环展开进行优化。关于SIMD，主要是在xor的地方进行优化，借助 _mm256_xor_si256(a, b)实现4个32bit数据同时异或运算；关于循环展开，在保证代码正确性的前提下，尽可能减少循环次数。除了这两种方法，我还考虑了多线程，但因为代码可并行结构较小，多线程的调用消耗时间，所以并没有采用多线程。
+
 
 运行指导：
-main函数中的字符串变量str是输入值，为十六进制字符串;32比特的数组v[8] 是输出值，为十六进制整型。改变变量str的值即能控制输入。
+    main函数中的字符串变量str是输入值，为十六进制字符串;32比特的数组v[8] 是输出值，为十六进制整型。改变变量str的值即能控制输入。
 
 个人贡献：
-自己一人完成。
+    自己一人完成。
 
 代码引用说明：
 1、https://blog.csdn.net/qq_35699583/article/details/113060927，实现迭代压缩过程。
