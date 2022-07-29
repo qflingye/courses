@@ -4,8 +4,14 @@
 #include <windows.h>
 #include<stdio.h>
 #include <immintrin.h>
-#define u32 unsigned int
 using namespace std;
+#define u32 unsigned int
+#define u256 __m256i
+#define loadu256(A, B)  A = _mm256_loadu_si256((u256 *)(B))
+#define storeu256(A, B)  _mm256_storeu_si256((u256 *)(A), B)
+#define pxor256(C, A, B)    C = _mm256_xor_si256(A, B)
+#define set256_32(a, e7,e6,e5,e4,e3,e2,e1,e0) a = _mm256_set_epi32 (e7,e6,e5,e4,e3,e2,e1,e0)
+#define U32From256(A, I) (_mm256_extract_epi32((A), (I)))
 
 static const u32 IV[8] =
 {
@@ -23,7 +29,6 @@ static u32 FF(u32 X, u32 Y, u32 Z, u32 j) {
 	else if (j >= 16 && j < 64)
 		a = X & Y;  b = X & Z; c = Y & Z;
 	return (a | b | c);
-	return 0;
 }
 static u32 GG(u32 X, u32 Y, u32 Z, u32 j)
 {
@@ -33,7 +38,6 @@ static u32 GG(u32 X, u32 Y, u32 Z, u32 j)
 	else if (j >= 16 && j < 64)
 		a = X & Y; b = (~X) & Z;
 	return (a | b);
-	return 0;
 }
 //左移
 u32 left_move(u32 a, int length) {
@@ -50,7 +54,6 @@ static u32 P0(u32 X)
 	a = left_move(X, 9); b = left_move(X, 17);
 	return (X ^ a ^ b);
 }
-
 static u32 P1(u32 X)
 {
 	u32 a, b;
@@ -87,20 +90,16 @@ int StrToInt(char s) {
 //填充
 void fill(string m, u32 M[], int s) {//消息，填充后消息,分组数
 	string res = "";
-	int l = m.size() * 4;
-	int n = s * 16;//填充后长度
+	int l = m.size()<<2;
+	int n = s<<7;//填充后长度
 	res += m;//原有字符
 	res += "8";//1
-	while (res.size() % 128 != 112) {
-		res += "0";//“0”数据填充
-	}
 	string res_len = DecToHex(l);
-	while (res_len.size() != 16) {
-		res_len = "0" + res_len;
-	}
-	res += res_len;
+	int mm = 128 - res.size() % 128 - res_len.size();
+	string rr(mm, '0');
+	res = res + rr + res_len;
 	int i = 0;
-	for (int j = 0; j < n * 8; j += 8) {
+	for (int j = 0; j < n ; j += 8) {
 		int t1 = StrToInt(res[j]);
 		int t2 = StrToInt(res[j + 1]);
 		int t3 = StrToInt(res[j + 2]);
@@ -118,56 +117,50 @@ void fill(string m, u32 M[], int s) {//消息，填充后消息,分组数
 void CF(u32 M[], u32 V[])
 {
 	//消息扩展
-	u32 W68[68] = { 0 };
-	u32 W64[64] = { 0 };
-	int j = 0;
-	/*for (j = 0; j < 16; j++)
-	{
-		W68[j] = M[j];
-	}
+	u32 W68[68];
+	u32 W64[64];
 	
-	for (j = 16; j < 68; j++)
-	{
-		W68[j] = P1(W68[j - 16] ^ W68[j - 9] ^ (left_move(W68[j - 3], 15))) ^ (left_move(W68[j - 13], 7)) ^ W68[j - 6];
-	}
-	for (j = 0; j < 64; j++)
-	{
-		W64[j] = W68[j] ^ W68[j + 4];
-	}
-	*/
 	W68[0] = M[0]; W68[1] = M[1]; W68[2] = M[2]; W68[3] = M[3]; W68[4] = M[4]; W68[5] = M[5]; W68[6] = M[6]; W68[7] = M[7];
 	W68[8] = M[8]; W68[9] = M[9]; W68[10] = M[10]; W68[11] = M[11]; W68[12] = M[12]; W68[13] = M[13]; W68[14] = M[14]; W68[15] = M[15];
-	for (j = 16; j < 68; j += 2)
+	
+	for (int j = 16; j < 68; j += 4)
 	{
-		u32 a; u32 b; u32 c; u32 d; u32 e; u32 f;
+		u32 a; u32 b; u32 c; u32 d; u32 e; u32 f; u32 a1; u32 b1; u32 c1; u32 d1; u32 e1; u32 f1;
 		a = W68[j - 16] ^ W68[j - 9]; b = left_move(W68[j - 3], 15); c = left_move(W68[j - 13], 7);
 		d = W68[j - 15] ^ W68[j - 8]; e = left_move(W68[j - 2], 15); f = left_move(W68[j - 12], 7);
 		W68[j] = P1(a ^ b) ^ c ^ W68[j - 6];
 		W68[j + 1] = P1(d ^ e) ^ f ^ W68[j - 5];
+		a1 = W68[j - 14] ^ W68[j - 7]; b1 = left_move(W68[j - 1], 15); c1 = left_move(W68[j - 11], 7);
+		d1 = W68[j - 13] ^ W68[j - 6]; e1 = left_move(W68[j], 15); f1 = left_move(W68[j - 10], 7);
+		W68[j + 2] = P1(a1 ^ b1) ^ c1 ^ W68[j - 4];
+		W68[j + 3] = P1(d1 ^ e1) ^ f1 ^ W68[j - 3];
 	}
-
-	for (j = 0; j < 64; j += 16)
+	
+	
+	for (int j = 0; j < 64; j += 8)
 	{
-		W64[j] = W68[j] ^ W68[j + 4]; W64[j + 1] = W68[j + 1] ^ W68[j + 5]; W64[j + 2] = W68[j + 2] ^ W68[j + 6]; W64[j + 3] = W68[j + 3] ^ W68[j + 7];
-		W64[j + 4] = W68[j + 4] ^ W68[j + 8]; W64[j + 5] = W68[j + 5] ^ W68[j + 9]; W64[j + 6] = W68[j + 6] ^ W68[j + 10]; W64[j + 7] = W68[j + 7] ^ W68[j + 11];
-		W64[j + 8] = W68[j + 8] ^ W68[j + 12]; W64[j + 9] = W68[j + 9] ^ W68[j + 13]; W64[j + 10] = W68[j + 10] ^ W68[j + 14]; W64[j + 11] = W68[j + 11] ^ W68[j + 15];
-		W64[j + 12] = W68[j + 12] ^ W68[j + 16]; W64[j + 13] = W68[j + 13] ^ W68[j + 17]; W64[j + 14] = W68[j + 14] ^ W68[j + 18]; W64[j + 15] = W68[j + 15] ^ W68[j + 19];
+		u256 cc1; u256 aa1; u256 bb1;
+		set256_32(aa1, W68[j + 7], W68[j + 6], W68[j + 5], W68[j + 4], W68[j + 3], W68[j + 2], W68[j + 1], W68[j]);
+		set256_32(bb1, W68[j + 11], W68[j + 10], W68[j + 9], W68[j + 8], W68[j + 7], W68[j + 6], W68[j + 5], W68[j + 4]);
+		set256_32(cc1, W64[j + 7], W64[j + 6], W64[j + 5], W64[j + 4], W64[j + 3], W64[j + 2], W64[j + 1], W64[j]);
+		pxor256(cc1, aa1, bb1);
+		W64[j] = U32From256(cc1, 0); W64[j + 1] = U32From256(cc1, 1); W64[j + 2] = U32From256(cc1, 2); W64[j + 3] = U32From256(cc1, 3);
+		W64[j + 4] = U32From256(cc1, 4); W64[j + 5] = U32From256(cc1, 5); W64[j + 6] = U32From256(cc1, 6); W64[j + 7] = U32From256(cc1, 7);
 	}
-
-	u32 A_G[8] = { 0 };
-	for (j = 0; j < 8; j++)
-	{
-		A_G[j] = V[j];
-	}
+	
+	u32 A_G[8] = { V[0],V[1],V[2],V[3],V[4],V[5],V[6],V[7] };
 
 	//压缩函数
 	u32 SS1 = 0, SS2 = 0, TT1 = 0, TT2 = 0;
-	int i = 0; int T[64];
-	for (i = 0; i < 16; i++)
-		T[i] = 0x79CC4519;
-	for (i = 16; i < 64; i++)
-		T[i] = 0x7A879D8A;
-	for (j = 0; j < 64; j++)
+	int T[64];
+	T[0] = 0x79CC4519; T[1] = 0x79CC4519; T[2] = 0x79CC4519; T[3] = 0x79CC4519; T[4] = 0x79CC4519; T[5] = 0x79CC4519; T[6] = 0x79CC4519; T[7] = 0x79CC4519;
+	T[8] = 0x79CC4519; T[9] = 0x79CC4519; T[10] = 0x79CC4519; T[11] = 0x79CC4519; T[12] = 0x79CC4519; T[13] = 0x79CC4519; T[14] = 0x79CC4519; T[15] = 0x79CC4519;
+	for (int i = 16; i < 64; i += 16) {
+		T[i + 1] = 0x7A879D8A; T[i + 2] = 0x7A879D8A; T[i + 3] = 0x7A879D8A; T[i + 4] = 0x7A879D8A; T[i + 5] = 0x7A879D8A; T[i + 6] = 0x7A879D8A; T[i + 7] = 0x7A879D8A;
+		T[i] = 0x7A879D8A; T[i + 8] = 0x7A879D8A; T[i + 9] = 0x7A879D8A; T[i + 10] = 0x7A879D8A; T[i + 11] = 0x7A879D8A; T[i + 12] = 0x7A879D8A; T[i + 13] = 0x7A879D8A; T[i + 14] = 0x7A879D8A; T[i + 15] = 0x7A879D8A;
+	}
+
+    for (int j = 0; j < 64; j++)
 	{
 		SS1 = left_move((left_move(A_G[0], 12) + A_G[4] + left_move(T[j], j % 32)), 7);
 		SS2 = SS1 ^ (left_move(A_G[0], 12));
@@ -182,15 +175,11 @@ void CF(u32 M[], u32 V[])
 		A_G[5] = A_G[4];
 		A_G[4] = P0(TT2);
 	}
-	/*for (j = 0; j < 8; j++)
-	{
-		V[j] = A_G[j] ^ V[j];
-	}*/
-	__m256i a; __m256i b; __m256i v;
-	a = _mm256_loadu_si256((const __m256i*)A_G);
-	b = _mm256_loadu_si256((const __m256i*)V);
-	v = _mm256_xor_si256(a, b);
-	_mm256_storeu_si256((__m256i*)V, v); 
+	u256 a1; u256 b1; u256 v;
+	loadu256(a1,A_G);
+	loadu256(b1,V);
+	pxor256(v, a1, b1);
+	storeu256(V, v);
 }
 int main() {
 	string str = "616263";//输入消息，16进制
@@ -209,7 +198,7 @@ int main() {
 	u32 M[100];//填充后的消息
 	int le = (length + 73) / 64;//分组数
 	fill(str, M, le);//消息，填充后消息，分组数
-	u32 v[8] = { 0 };
+	u32 v[8];
 	v[0] = IV[0]; v[1] = IV[1]; v[2] = IV[2]; v[3] = IV[3];
 	v[4] = IV[4]; v[5] = IV[5]; v[6] = IV[6]; v[7] = IV[7];
 	for (int i = 0; i < le; i++) {
