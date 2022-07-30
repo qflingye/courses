@@ -1,0 +1,14 @@
+代码说明：
+    该代码是SM3生日攻击代码，是Project:implement the naive birthday attack of reduced SM3。
+    生日扩展攻击即寻找两个不等的消息m、m1，通过杂凑运算，使得H(m)=H(m1)，所以本项目思路就是不断生成消息m和m1，通过sm3运算，当它们的杂凑值相等时，停止。
+
+
+运行指导：
+    通过改变res1和res2最终的输出值，来改变该项目SM3生日攻击需要的杂凑值位数，本实验为32比特。
+    
+个人贡献：
+    自己一人完成。
+
+代码引用说明：
+1、https://blog.csdn.net/weixin_44932880/article/details/118385226
+2、https://blog.csdn.net/qq_35699583/article/details/113060927
