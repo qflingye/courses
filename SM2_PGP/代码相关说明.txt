@@ -1,0 +1,15 @@
+代码说明：
+    该代码是PGP加解密代码，是Project:implement a PGP scheme with SM2。
+    PGP（Pretty Good Privacy）是一个完整的电子邮件安全软件包，提供了私密性、认证、数字签名和压缩功能。本项目直接使用gmssl模块中的SM2和SM4进行加解密操作。
+    PGP加密的步骤：1）为消息生成一个随机数作为会话密钥；2）用会话密钥加密消息（SM4加密，CBC模式）；3）用接收者的公钥加密会话密钥（SM2加密）；4）公钥加密过的会话密钥与会话密钥加密过的消息结合（SM4加密，CBC模式，公钥加密过的会话密钥为密钥，会话密钥加密过的消息为待加密值）。
+    PGP解密的步骤：1）分解（SM4加密，CBC模式，公钥加密过的会话密钥为密钥，PGP加密结果为待加密值）；2）用自己的私钥解密恢复会话密钥（SM2解密）；3）用会话密钥解密恢复消息（SM4解密，CBC模式）。
+
+运行指导：
+    直接运行。
+    
+个人贡献：
+    自己一人完成。
+
+代码引用说明：
+1、https://blog.csdn.net/weixin_39572764/article/details/113509805?ops_request_misc=&request_id=&biz_id=102&utm_term=SM2%20python&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-4-113509805.nonecase&spm=1018.2226.3001.4187
+2、https://blog.csdn.net/qq_42248536/article/details/105805078?ops_request_misc=&request_id=&biz_id=102&utm_term=PGP&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-105805078.142^v35^experiment_28w_v1&spm=1018.2226.3001.4187
