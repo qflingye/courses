@@ -9,3 +9,4 @@
 2、Project:implement length extension attack for SM3
 3、Project:implement length extension attack for SHA25
 4、Project:implement the naive birthday attack of reduced SM3
+5、Project:Find a key with hash value "sdu_cst_20220610" under a message composed of your name followed by your student ID。
