@@ -1,5 +1,6 @@
 #SM3生日攻击
 import re
+import threading
 import random
 #几个常量定值
 iv='7380166f4914b2b9172442d7da8a0600a96f30bc163138aae38dee4db0fb0e4e'
@@ -120,9 +121,7 @@ def res1():
         if b!='':
             v1=cf(iv,b)
         return me,v1[:8]
-   
-if __name__ ==  '__main__':
-    print("32比特")
+def tt():
     str1,v1=res1()
     str2,v2=res1()
     while(v1!=v2 or str1==str2):
@@ -130,4 +129,17 @@ if __name__ ==  '__main__':
         str2,v2=res1()
     print("生日攻击成功！")
 
-                    
+if __name__ ==  '__main__':
+    print("32比特")
+    t1=threading.Thread(target=tt)
+    t2=threading.Thread(target=tt)
+    t3=threading.Thread(target=tt)
+    t4=threading.Thread(target=tt)
+    t1.start()
+    t1.join()
+    t2.start()
+    t2.join()
+    t3.start()
+    t3.join()
+    t4.start()
+    t4.join()
