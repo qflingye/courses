@@ -1,10 +1,10 @@
 #SM3生日攻击
 import re
-import threading
+import random
 #几个常量定值
 iv='7380166f4914b2b9172442d7da8a0600a96f30bc163138aae38dee4db0fb0e4e'
-sstr="abcdefghijklmnopqrstuvwxyz"
-sstr1="bcnopqrstdeafgyhijklmuvwxz"
+sstr=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+
 T = [0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,
      0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,0x79CC4519,
      0x7A879D8A,0x7A879D8A,0x7A879D8A,0x7A879D8A,0x7A879D8A,0x7A879D8A,0x7A879D8A,0x7A879D8A,
@@ -105,34 +105,29 @@ def cf(v,b):
         v1="0"*(64-len(v1))+str(v1)
     return v1
 
-#生成num长的由字符串tt中字符组成的字符串
-def mess(tt,num):
-    if(num == 1):
-        for x in tt:
-            yield x
-    else:
-        for x in tt:
-            for y in mess(tt, num-1):
-                yield x+y
+
+#生成n个字母的小写字符串
+def crea(n):
+    rs=""
+    for i in range(n):
+        rs+=sstr[random.randint(0,25)]  
+    return rs
+
 #整合
 def res1():
-    for me in mess(sstr,le):
-        for b in ad(me):
-            if b!='':
-                v1=cf(iv,b)
-            return me,v1[:8]
-def res2():
-    for me in mess(sstr1,le):
-        for b in ad(me):
-            if b!='':
-                v1=cf(iv,b)
-            return me,v1[:8]
-    
+    me=crea(4)
+    for b in ad(me):
+        if b!='':
+            v1=cf(iv,b)
+        return me,v1[:8]
+   
 if __name__ ==  '__main__':
-    le=128 
     print("32比特")
-    v1=0;v2=1
-    while(v1!=v2):
+    str1,v1=res1()
+    str2,v2=res1()
+    while(v1!=v2 or str1==str2):
         str1,v1=res1()
-        str2,v2=res2()
+        str2,v2=res1()
     print("生日攻击成功！")
+
+                    
